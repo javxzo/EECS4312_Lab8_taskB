@@ -1,6 +1,98 @@
-## Student Name:
-## Student ID: 
+## Student Name: Javeria Alam
+## Student ID: 218714451
 
-Prompt #1: {}
-Response #1: {}
---------------------------------------------------
+Prompt #1: {
+In this lab, you will design and implement an Event Registration with Waitlist system using an LLM assistant as your primary programming collaborator. You are asked to implement a Python module that manages registration for a single event with a fixed capacity. The system must: • Accept a fixed capacity. • Register users until capacity is reached. • Place additional users into a FIFO waitlist. • Automatically promote the earliest waitlisted user when a registered user cancels. • Prevent duplicate registrations. • Allow users to query their current status. The system must ensure that: • The number of registered users never exceeds capacity. • Waitlist ordering preserves FIFO behavior. • Promotions occur deterministically under identical operation sequences. The module must preserve the following invariants: • A user may not appear more than once in the system. • A user may not simultaneously exist in multiple states.
+• The system state must remain consistent after every operation. The system must correctly handle non-trivial scenarios such as: • Multiple cancellations in sequence. • Users attempting to re-register after canceling. • Waitlisted users canceling before promotion. • Capacity equal to zero. • Simultaneous or rapid consecutive operations. • Queries during state transitions. The output consists of the updated registration state and ordered lists of registered and waitlisted users after each operation.
+
+This is the problem summary:
+The system must manage registration for a single event with a fixed capacity while maintaining a queue for the users.
+The functional requirements:
+The system must accept a fixed capacity.
+The system must accept a capacity whole number greater than 0.
+The system must add user to registered list if space is available.
+The system must place the user on the FIFO queue waitlist if there is no space available.
+The system must reject duplicate registrations.
+The system shall allow users to remove themself from the registered.
+The system shall allow users to remove themself from the waitlist.
+The system shall respond to a registered user cancelling by promoting the earliest waitlisted user.
+The system shall allow users to query their current status and return their status and position number.
+The system shall return ordered lists of registered users and waitlisted users. 
+Contraints:
+1. Registered users must not exceed capacity.
+2. Waitlist ordering must remain FIFO.
+3. A user cannot appear more than once in the system.
+4. A user cannot be both registered and waitlisted simultaneously
+5. The system must remain consistent after each operation
+6. Cancelling a non existent user raises the NotFound error
+7. Waitlist positions use 1-based indexing
+8. Users can reregister after cancelling. 
+and Acceptance Criteria:
+AC1:  Given the event has available capacity, When a user registers, Then the user is added to the registered list and their status is "registered". Linked Constraint IDs: C1, C5
+Ac2: Given the event is at full capacity, when a user registers, then the user is placed on the waitlist in FIFO order with a 1-based position index. Linked Constraints: C1, C2, C7
+AC3: Given a registered user cancels,  when there is at least one user on the waitlist, then the earliest waitlisted user is promoted to registered, and the remaining waitlist positions update accordingly. Linked constraints: C2, C5
+AC4: Given a user is already registered or waitlisted,  When the same user attempts to register again, then a DuplicateRequest exception is raised and the system state is unchanged. Linked Constraints: C3, C4, C5
+AC5: Given any system state,  when a user queries their status,  then the system returns one of: "registered", "waitlisted" (with their position), or "none". Linked Constraints: C5, C7
+AC6:  Given a user does not exist in the system, if cancel is called for that user, then a NotFound exception is raised. Linked Constraint IDs: C6
+AC7: Given a user previously canceled their registration,  when that user registers again, then they are treated as a new registrant subject to current capacity. Linked Constraints: C3, C8
+AC8: Given the event capacity is 0, when any user registers,  then all users are placed on the waitlist in FIFO order and none are ever promoted to registered. Linked Constraints: C1, C2
+
+Are there any ambiguities or missing clarifications?
+}
+Response #1: {
+Yes, here are some ambiguities and missing clarifications worth addressing:
+
+---
+
+## Ambiguities
+
+**1. What counts as a valid user_id?**
+- Can a user_id be an empty string?
+- Are there any format restrictions (numbers only, letters only, special characters)?
+- Is it case sensitive — is `"Alice"` the same as `"alice"`?
+
+**2. What happens when a registered user cancels and the waitlist is empty?**
+- AC3 only covers the case where a waitlist exists. The behavior when the waitlist is empty after a registered user cancels is not explicitly stated, though it is implied.
+
+**3. What does "simultaneous or rapid consecutive operations" mean concretely?**
+- Is the system expected to handle multithreading or concurrency, or is this just referring to back-to-back sequential calls?
+
+**4. Capacity validation**
+- The functional requirements say capacity must be a whole number greater than 0, but AC8 explicitly handles capacity equal to zero as a valid scenario. These two statements contradict each other — which one takes precedence?
+
+**5. What does status return for a non-existent user?**
+- AC5 mentions returning "none" but it is not explicitly stated whether this is a string, a None type, or a custom status object.
+
+---
+
+## Missing Clarifications
+
+**6. Snapshot/output format**
+- The problem mentions returning ordered lists after each operation, but it is not specified whether this happens automatically after every operation or only when explicitly called.
+
+**7. Re-registration position**
+- AC7 says a re-registering user is treated as new, but does not specify whether they join the back of the waitlist if capacity is full, which should be confirmed explicitly.
+
+**8. Canceling twice**
+- What happens if a user cancels, and then tries to cancel again? AC6 covers unknown users but a double-cancel scenario sits in a grey area between AC6 and AC7.
+
+---
+
+## Summary Table
+
+| # | Ambiguity | Affects |
+|---|---|---|
+| 1 | Valid user_id format and case sensitivity | AC1, AC2, AC4 |
+| 2 | Cancel with empty waitlist behavior | AC3 |
+| 3 | Concurrency expectations | C5 |
+| 4 | Capacity = 0 contradicts FR saying capacity > 0 | AC8, C1 |
+| 5 | Return type of "none" status | AC5 |
+| 6 | When snapshot is triggered | AC1–AC8 |
+| 7 | Re-registration waitlist position | AC7 |
+| 8 | Double cancellation behavior | AC6 |
+
+}
+
+Summary - I wanted to put all the main information out there and gain insight on the ambiguities within the requirements/constraints so that they may be fixed.
+Accepted - I used this to revise the current requirements we have.
+-------------------------------------------
