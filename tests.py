@@ -1,3 +1,6 @@
+#Student name: Javeria Alam
+#Student id: 218714451
+
 import pytest
 
 from solution import EventRegistration, UserStatus, DuplicateRequest, NotFound
