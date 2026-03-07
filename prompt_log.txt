@@ -96,3 +96,132 @@ Yes, here are some ambiguities and missing clarifications worth addressing:
 Summary - I wanted to put all the main information out there and gain insight on the ambiguities within the requirements/constraints so that they may be fixed.
 Accepted - I used this to revise the current requirements we have.
 -------------------------------------------
+Prompt #2: {
+right, so I've given you the problem summary, the functional requirements, constraints and acceptance criteria, given your text above - how would you revise those four?
+}
+Response #2: {
+    Here are the revised versions of all four, incorporating the ambiguities identified:
+
+---
+
+## Problem Summary
+
+The system must manage registration for a single event with a fixed non-negative integer capacity while maintaining a FIFO queue for overflow users. User identifiers must be non-empty, case-sensitive strings. The system must remain consistent after every operation, including cancellations with an empty waitlist, sequential cancellations, and re-registration attempts. All state is managed in memory and exposed through explicit query and snapshot calls.
+
+---
+
+## Functional Requirements
+
+**Registration**
+- FR1: The system must accept a fixed capacity as a non-negative integer (zero or greater).
+- FR2: The system must add a user to the registered list if space is available.
+- FR3: The system must place a user on the FIFO waitlist if no space is available, including when capacity is zero.
+- FR4: The system must reject duplicate registrations with a DuplicateRequest exception, leaving state unchanged.
+
+**Cancellation**
+- FR5: The system must allow a registered user to cancel, removing them from the registered list.
+- FR6: The system must allow a waitlisted user to cancel, removing them from the waitlist and updating all remaining positions.
+- FR7: When a registered user cancels and the waitlist is non-empty, the earliest waitlisted user must be promoted to registered.
+- FR8: When a registered user cancels and the waitlist is empty, the registered list simply decreases by one with no further action.
+- FR9: Canceling a user that does not exist in the system must raise a NotFound exception.
+- FR10: Canceling a user that has already canceled must raise a NotFound exception.
+
+**Status & Output**
+- FR11: The system must allow any user to query their status, returning "registered", "waitlisted" with a 1-based position, or "none" as a UserStatus object.
+- FR12: The system must expose a snapshot function that returns the current ordered list of registered users and ordered waitlist on demand.
+
+**Re-registration**
+- FR13: A user who has previously canceled may re-register and must be treated as a brand new registrant, joining the back of the waitlist if capacity is full.
+
+**User Identity**
+- FR14: User identifiers must be non-empty, case-sensitive strings. "Alice" and "alice" are treated as different users.
+
+---
+
+## Constraints
+
+- C1: Registered users must never exceed capacity.
+- C2: Waitlist ordering must remain FIFO at all times, including after cancellations and promotions.
+- C3: A user cannot appear more than once in the system.
+- C4: A user cannot exist in both the registered list and waitlist simultaneously.
+- C5: The system must remain consistent after every operation, including edge cases such as empty waitlist cancellations and capacity zero.
+- C6: Canceling a user not currently in the system must raise a NotFound exception, including users who have already canceled.
+- C7: Waitlist positions must use 1-based indexing in all status responses.
+- C8: Users may re-register after canceling and must be treated as new registrants with no residual state.
+- C9: Capacity must be a non-negative integer. Zero is a valid capacity.
+- C10: User identifiers must be non-empty, case-sensitive strings.
+
+---
+
+## Acceptance Criteria
+
+```
+AC1:
+Given the event has available capacity,
+When a user registers,
+Then the user is added to the registered list and their status is "registered".
+Linked Constraint ID(s): C1, C5
+
+AC2:
+Given the event is at full capacity or capacity is zero,
+When a user registers,
+Then the user is placed at the back of the waitlist in FIFO order
+with a 1-based position index.
+Linked Constraint ID(s): C1, C2, C7, C9
+
+AC3:
+Given a registered user cancels and the waitlist is non-empty,
+When the cancellation is processed,
+Then the earliest waitlisted user is promoted to registered
+and remaining waitlist positions update accordingly.
+Linked Constraint ID(s): C2, C5
+
+AC4:
+Given a registered user cancels and the waitlist is empty,
+When the cancellation is processed,
+Then the registered list decreases by one and no promotion occurs.
+Linked Constraint ID(s): C1, C5
+
+AC5:
+Given a user is already registered or waitlisted,
+When the same user attempts to register again,
+Then a DuplicateRequest exception is raised and the system state is unchanged.
+Linked Constraint ID(s): C3, C4, C5
+
+AC6:
+Given any system state,
+When a user queries their status,
+Then the system returns a UserStatus object containing one of:
+"registered", "waitlisted" with a 1-based position, or "none".
+Linked Constraint ID(s): C5, C7
+
+AC7:
+Given a user does not exist in the system or has already canceled,
+When cancel is called for that user,
+Then a NotFound exception is raised and the system state is unchanged.
+Linked Constraint ID(s): C6
+
+AC8:
+Given a user previously canceled,
+When that user registers again,
+Then they are treated as a brand new registrant with no residual state,
+joining the back of the waitlist if capacity is full.
+Linked Constraint ID(s): C3, C8
+
+AC9:
+Given the event capacity is zero,
+When any user registers,
+Then all users are placed on the waitlist in FIFO order
+and none are ever promoted to registered.
+Linked Constraint ID(s): C1, C2, C9
+
+AC10:
+Given two user identifiers that differ only by case,
+When both attempt to register,
+Then they are treated as distinct users and both are accepted independently.
+Linked Constraint ID(s): C10
+```
+}
+
+Summary - Provided an updated list of the previous information I've provided with resolved ambiguities.
+Accepted - used going forward.
