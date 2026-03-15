@@ -1,0 +1,91 @@
+Prompt #6 {
+Can you help with Question 8 without directly giving the answer, please help me brainstorm
+}
+
+Answer #6: {
+Absolutely! Let’s approach **8. Constraints** as a **brainstorming exercise** rather than a finished answer. I’ll guide you through thinking about each constraint, linked to the personas, behaviors, needs, and pain points. I’ll aim for **8 potential constraints**, phrased as questions or considerations that could turn into formal constraints.
+
+---
+
+### **Brainstorming 8 System Constraints**
+
+**C1:**
+
+* **Persona:** Jane
+* **Attribute:** Expects automation and conflict handling
+* **Prompt:** If a registered user cancels, how should the system handle users on the waitlist? Should promotion happen automatically, or require user intervention?
+* **Brainstorm idea:** Maybe the system should **automatically promote the earliest waitlisted user** to reduce manual effort.
+
+---
+
+**C2:**
+
+* **Persona:** Mo
+* **Attribute:** Needs deterministic behavior
+* **Prompt:** If multiple users register or cancel around the same time, how should the system decide promotion order? What ensures repeatable results?
+* **Brainstorm idea:** Consider **ordering promotions and waitlist strictly by the time of registration**, ensuring deterministic behavior.
+
+---
+
+**C3:**
+
+* **Persona:** Jane
+* **Attribute:** Avoids duplicates and overload
+* **Prompt:** What should happen if a user tries to register twice? Should the system silently ignore it, reject it, or notify the user?
+* **Brainstorm idea:** Might need a **duplicate registration check**, raising an error to prevent confusion.
+
+---
+
+**C4:**
+
+* **Persona:** Mo
+* **Attribute:** Needs transparency and explanations
+* **Prompt:** When a user is promoted from the waitlist or rejected, how should the system communicate this? Do users need positions, notifications, or logs?
+* **Brainstorm idea:** Could include a **status query that always shows waitlist position**, so the user understands their place.
+
+---
+
+**C5:**
+
+* **Persona:** Jane
+* **Attribute:** Expects predictable ordering
+* **Prompt:** How should the system order the waitlist? Should it be strictly FIFO, or can it reorder dynamically?
+* **Brainstorm idea:** A **FIFO waitlist** seems necessary to satisfy predictability.
+
+---
+
+**C6:**
+
+* **Persona:** Mo
+* **Attribute:** Handles edge cases explicitly
+* **Prompt:** What happens if capacity is 0? Or if multiple cancellations occur in a row? Or users try to reregister immediately?
+* **Brainstorm idea:** The system should **explicitly handle zero capacity, sequential cancellations, and re-registrations**, avoiding crashes or silent failures.
+
+---
+
+**C7:**
+
+* **Persona:** Jane
+* **Attribute:** Limited attention / minimal interaction
+* **Prompt:** How often should the system notify the user of promotions or changes? Could too many notifications overwhelm the user?
+* **Brainstorm idea:** Limit notifications to **essential status changes**, reducing cognitive load.
+
+---
+
+**C8:**
+
+* **Persona:** Mo
+* **Attribute:** Accessibility / clarity
+* **Prompt:** How can the system make its behavior explainable to users who may need to verify every action?
+* **Brainstorm idea:** Include a **snapshot function** or detailed logs showing current registrations and waitlist ordering to support transparency.
+
+---
+
+This way, the brainstorming **triggers you to think of constraints from the personas’ needs and behaviors**, without locking them into final wording. Each of these ideas could be converted into a formal, testable constraint in the next step.
+
+---
+
+If you want, I can also **turn this brainstorming into a table of 8 formal constraints** ready for the eClass submission—but the brainstorming method preserves the reasoning step first.
+
+Do you want me to do that next?
+}
