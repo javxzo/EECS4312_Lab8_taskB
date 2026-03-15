@@ -1651,6 +1651,267 @@ Do you want me to do that next?
 
 }
 
+Prompt 9: {
+This is my current solution.py, what needs to change to fulfill all requirements?
+The implementation
+should follow the acceptance criteria defined in your requirements and should handle the
+edge cases identified earlier in the lab. 
+
+from dataclasses import dataclass
+from collections import deque
+from typing import List, Optional
+
+
+class DuplicateRequest(Exception):
+    """Raised if a user tries to register but is already registered or waitlisted."""
+    pass
+
+
+class NotFound(Exception):
+    """Raised if a user cannot be found for cancellation."""
+    pass
+
+
+@dataclass(frozen=True)
+class UserStatus:
+    """
+    state:
+      - "registered"
+      - "waitlisted"
+      - "none"
+    position: 1-based waitlist position if waitlisted; otherwise None
+    """
+    state: str
+    position: Optional[int] = None
+
+
+class EventRegistration:
+    """
+    Manages registration for a single event with a fixed capacity and FIFO waitlist.
+
+    Invariants:
+      - Registered users never exceed capacity.
+      - Waitlist ordering is strictly FIFO.
+      - A user cannot appear more than once in the system.
+      - A user cannot be both registered and waitlisted simultaneously.
+      - System state remains consistent after every operation.
+    """
+
+    def __init__(self, capacity: int) -> None:
+        """
+        Args:
+            capacity: maximum number of registered users (>= 0)
+        """
+        # C1, C9: capacity must be a non-negative integer
+        if not isinstance(capacity, int) or capacity < 0:
+            raise ValueError("Capacity must be a non-negative integer.")
+
+        self._capacity = capacity
+
+        # Maintains insertion order for registered users
+        self._registered: List[str] = []
+
+        # deque ensures O(1) FIFO promotion from the front
+        # C2: waitlist ordering must remain FIFO
+        self._waitlist: deque[str] = deque()
+
+    def register(self, user_id: str) -> UserStatus:
+        """
+        Register a user:
+          - If capacity available -> registered
+          - Else -> waitlisted (FIFO)
+
+        Raises:
+            DuplicateRequest: if user already exists (registered or waitlisted)
+            ValueError: if user_id is not a non-empty string
+        """
+        # C10: user_id must be a non-empty string
+        if not isinstance(user_id, str) or not user_id:
+            raise ValueError("user_id must be a non-empty string.")
+
+        # C3, C4: user cannot appear more than once or in multiple states
+        if user_id in self._registered or user_id in self._waitlist:
+            raise DuplicateRequest(f"User '{user_id}' is already in the system.")
+
+        # C1: register only if under capacity
+        if len(self._registered) < self._capacity:
+            self._registered.append(user_id)
+            return UserStatus("registered")
+        else:
+            # C2, C7: append to back of FIFO waitlist, position is 1-based
+            self._waitlist.append(user_id)
+            position = len(self._waitlist)
+            return UserStatus("waitlisted", position)
+
+    def cancel(self, user_id: str) -> None:
+        """
+        Cancel a user:
+          - If registered -> remove and promote earliest waitlisted user (if any)
+          - If waitlisted -> remove from waitlist, update positions implicitly
+          - If not found -> raise NotFound
+
+        Raises:
+            NotFound: if user does not exist in the system
+        """
+        # C6: canceling a non-existent user raises NotFound
+        if user_id not in self._registered and user_id not in self._waitlist:
+            raise NotFound(f"User '{user_id}' not found in the system.")
+
+        if user_id in self._registered:
+            # Remove from registered list
+            self._registered.remove(user_id)
+
+            # C2, C5: promote earliest waitlisted user if waitlist is non-empty
+            if self._waitlist:
+                promoted = self._waitlist.popleft()
+                self._registered.append(promoted)
+        else:
+            # C2: remove from waitlist; deque reordering preserves FIFO
+            waitlist_as_list = list(self._waitlist)
+            waitlist_as_list.remove(user_id)
+            self._waitlist = deque(waitlist_as_list)
+
+    def status(self, user_id: str) -> UserStatus:
+        """
+        Return status of a user:
+          - "registered"
+          - "waitlisted" with 1-based position
+          - "none" if not in system
+
+        C5, C7: consistent state and 1-based indexing
+        """
+        if user_id in self._registered:
+            return UserStatus("registered")
+
+        if user_id in self._waitlist:
+            # C7: 1-based position
+            position = list(self._waitlist).index(user_id) + 1
+            return UserStatus("waitlisted", position)
+
+        return UserStatus("none")
+
+    def snapshot(self) -> dict:
+        """
+        Returns a deterministic snapshot of internal state.
+
+        Returns:
+            dict with keys:
+              "registered": ordered list of registered user_ids
+              "waitlist":   ordered list of waitlisted user_ids (FIFO order)
+        """
+        return {
+            "registered": list(self._registered),
+            "waitlist": list(self._waitlist),
+        }
+}
+Answer 9: {
+Thanks for sharing your current `solution.py`. Overall, it’s solid and already implements most of the functional requirements and constraints from your requirements.txt. There are, however, a few gaps and improvements needed to **fully satisfy all ACs, constraints, and edge cases**:
+
+---
+
+### **1. Input validation**
+
+Currently, you only validate that `user_id` is a non-empty string. But we also need to:
+
+* Validate that capacity (during `__init__`) is a non-negative integer ✅ (already done)
+* Ensure `user_id` is valid on **all methods**, e.g., `cancel()` and `status()` should raise `ValueError` if `user_id` is `None` or not a string (currently `cancel()` raises `NotFound`, but for invalid types we should raise `ValueError`).
+
+---
+
+### **2. Snapshot transparency and edge handling**
+
+Your `snapshot()` method is fine for current state, but consider:
+
+* Edge case: if `register()` or `cancel()` is called in rapid succession, the snapshot must reflect exact current state (C8, AC4, AC8). ✅ Currently it does this, but you may want to ensure you don’t convert `deque` multiple times for performance if called frequently.
+
+---
+
+### **3. Re-registration after cancellation**
+
+Currently, the system allows re-registration naturally, but you might want to explicitly test:
+
+* That after a user cancels, if they re-register, they are treated as a new registration and placed correctly in the registered list or waitlist (FR8, EC6, AC8).
+
+---
+
+### **4. Deterministic ordering**
+
+* Your code appends to the end of `_registered` and `_waitlist`, so ordering is deterministic under sequential calls. ✅
+* Make sure that if multiple cancellations or promotions happen in quick succession, the **FIFO order of waitlist** is always preserved. Currently correct.
+
+---
+
+### **5. Invalid inputs for `cancel` and `status`**
+
+* `cancel()` raises `NotFound` if the user does not exist. This is correct.
+* But `cancel()` and `status()` should also raise `ValueError` if `user_id` is invalid (None, empty, or non-string). This matches FR7 and EC5.
+
+---
+
+### **6. Notification / feedback**
+
+* FR6 requires “clear feedback and status including waitlist position.”
+* Currently `register()` and `status()` return `UserStatus`, which satisfies this.
+* Optionally, you could make `cancel()` return info about promotions (like `UserStatus` of promoted user) to satisfy AC2 transparently.
+
+---
+
+### **7. Edge case handling explicitly**
+
+Your current code mostly handles:
+
+* Zero capacity ✅ (EC1, AC6)
+* Duplicate registration ✅ (EC2, AC3)
+* Sequential cancellations ✅ (EC3, AC2/AC5)
+* Waitlisted user cancels ✅ (EC4)
+* Re-registration ✅ (EC6)
+* Invalid inputs partially ✅ (EC5 needs refinement)
+
+---
+
+### **8. Summary of recommended changes**
+
+1. **Input validation in all methods:**
+
+```python
+def cancel(self, user_id: str) -> None:
+    if not isinstance(user_id, str) or not user_id:
+        raise ValueError("user_id must be a non-empty string.")
+    ...
+def status(self, user_id: str) -> UserStatus:
+    if not isinstance(user_id, str) or not user_id:
+        raise ValueError("user_id must be a non-empty string.")
+    ...
+```
+
+2. **Optional: Return promoted user info in `cancel()`**
+
+```python
+if self._waitlist:
+    promoted = self._waitlist.popleft()
+    self._registered.append(promoted)
+    return UserStatus("registered")  # feedback to caller
+```
+
+3. **Ensure snapshots always reflect exact current state** – already satisfied. ✅
+
+4. **Edge case tests** – write unit tests to verify:
+
+* Zero capacity
+* Duplicate registration
+* Sequential cancellations
+* Waitlist cancel before promotion
+* Invalid inputs
+* Re-registration after cancellation
+
+---
+
+If you want, I can rewrite the **full `EventRegistration` class** updated with these improvements, fully aligned to your requirements.txt, acceptance criteria, and edge cases. This would be a ready-to-submit `solution.py`.
+
+Do you want me to do that?
+
+}
+
 
 
 
