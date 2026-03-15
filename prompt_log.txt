@@ -957,3 +957,375 @@ def test_scenario_full_cycle_register_cancel_reregister():
 
 Summary - responded with test cases that covered all the edge cases and normal cases.
 Accepted after review.
+
+Prompt #6 {
+Can you help with Question 8 without directly giving the answer, please help me brainstorm
+}
+
+Answer #6: {
+Absolutely! Let’s approach **8. Constraints** as a **brainstorming exercise** rather than a finished answer. I’ll guide you through thinking about each constraint, linked to the personas, behaviors, needs, and pain points. I’ll aim for **8 potential constraints**, phrased as questions or considerations that could turn into formal constraints.
+
+---
+
+### **Brainstorming 8 System Constraints**
+
+**C1:**
+
+* **Persona:** Jane
+* **Attribute:** Expects automation and conflict handling
+* **Prompt:** If a registered user cancels, how should the system handle users on the waitlist? Should promotion happen automatically, or require user intervention?
+* **Brainstorm idea:** Maybe the system should **automatically promote the earliest waitlisted user** to reduce manual effort.
+
+---
+
+**C2:**
+
+* **Persona:** Mo
+* **Attribute:** Needs deterministic behavior
+* **Prompt:** If multiple users register or cancel around the same time, how should the system decide promotion order? What ensures repeatable results?
+* **Brainstorm idea:** Consider **ordering promotions and waitlist strictly by the time of registration**, ensuring deterministic behavior.
+
+---
+
+**C3:**
+
+* **Persona:** Jane
+* **Attribute:** Avoids duplicates and overload
+* **Prompt:** What should happen if a user tries to register twice? Should the system silently ignore it, reject it, or notify the user?
+* **Brainstorm idea:** Might need a **duplicate registration check**, raising an error to prevent confusion.
+
+---
+
+**C4:**
+
+* **Persona:** Mo
+* **Attribute:** Needs transparency and explanations
+* **Prompt:** When a user is promoted from the waitlist or rejected, how should the system communicate this? Do users need positions, notifications, or logs?
+* **Brainstorm idea:** Could include a **status query that always shows waitlist position**, so the user understands their place.
+
+---
+
+**C5:**
+
+* **Persona:** Jane
+* **Attribute:** Expects predictable ordering
+* **Prompt:** How should the system order the waitlist? Should it be strictly FIFO, or can it reorder dynamically?
+* **Brainstorm idea:** A **FIFO waitlist** seems necessary to satisfy predictability.
+
+---
+
+**C6:**
+
+* **Persona:** Mo
+* **Attribute:** Handles edge cases explicitly
+* **Prompt:** What happens if capacity is 0? Or if multiple cancellations occur in a row? Or users try to reregister immediately?
+* **Brainstorm idea:** The system should **explicitly handle zero capacity, sequential cancellations, and re-registrations**, avoiding crashes or silent failures.
+
+---
+
+**C7:**
+
+* **Persona:** Jane
+* **Attribute:** Limited attention / minimal interaction
+* **Prompt:** How often should the system notify the user of promotions or changes? Could too many notifications overwhelm the user?
+* **Brainstorm idea:** Limit notifications to **essential status changes**, reducing cognitive load.
+
+---
+
+**C8:**
+
+* **Persona:** Mo
+* **Attribute:** Accessibility / clarity
+* **Prompt:** How can the system make its behavior explainable to users who may need to verify every action?
+* **Brainstorm idea:** Include a **snapshot function** or detailed logs showing current registrations and waitlist ordering to support transparency.
+
+---
+
+This way, the brainstorming **triggers you to think of constraints from the personas’ needs and behaviors**, without locking them into final wording. Each of these ideas could be converted into a formal, testable constraint in the next step.
+
+---
+
+If you want, I can also **turn this brainstorming into a table of 8 formal constraints** ready for the eClass submission—but the brainstorming method preserves the reasoning step first.
+
+Do you want me to do that next?
+}
+
+summary - used to brainstorm.
+Prompt #7: {
+The system’s objective is to manage event registrations with a fixed capacity, automatically handling a FIFO waitlist, cancellations, and status queries, while ensuring deterministic, consistent, and conflict-free behavior.
+PERSONA 1 - Jane Adams (Primary User)
+Context. Busy professional managing daily routines and commitments who relies on
+automation to reduce cognitive load. Jane uses digital tools for medication reminders
+and event registrations and expects them to work reliably without manual oversight.
+Behaviors.
+• Acts quickly and rarely revisits system suggestions.
+• Trusts the system to resolve conflicts and enforce rules automatically.
+• Prefers concise outputs and minimal interaction when making decisions.
+Needs.
+• Predictable and stable ordering of reminders or system decisions.
+• Automatic handling of conflicts (e.g., reminder collisions or waitlist promotion).
+• Limited notification or information overload.
+Pain Points.
+• Receiving too many notifications or duplicate system messages.
+• Systems behave inconsistently in similar situations.
+• Having to manually resolve conflicts or check system correctness.
+PERSONA 2 – Mo Rodriguez (Edge User)
+Context. User with accessibility needs & heightened sensitivity to uncertainty. Mo relies
+on explicit explanations and consistent behavior to build trust in automated systems.
+Behaviors.
+• Carefully reviews outputs and seeks explanations for system decisions.
+• Performs frequent updates (e.g., snoozing reminders or cancelling
+registrations).
+• Experiences stress when outcomes appear arbitrary or unexplained.
+Needs.
+• Deterministic system behavior under ties or conflicting conditions.
+• Clear explanations when reminders are moved, skipped, or when waitlist
+promotions occur.
+• Explicitly handle edge cases instead of silent failure.
+Pain Points.
+• Not understanding why the system changed or rejected an action.
+• Silent failures or dropped reminders/requests.
+• Inconsistent responses across repeated or boundary scenarios.
+C1
+
+Persona: Jane
+Persona Attribute: acts quickly, expects automatic handling of conflicts
+attribute type: behaviour
+operationalization: waitlist promotions should occur automatically upon cancellations
+derived constraint: the system must automatically promote the earliest waitlisted user when a registered user cancels
+current support level: Fully supported by lab 8.
+C2
+
+Persona: Mo
+Persona Attribute: Stress if outcomes appear arbitrary 
+attribute type: pain point
+operationalization: system must behave deterministically under identical conditions
+derived constraint: Waitlist promotions and ordering must be deterministic given the same sequence of operations
+current support level: Fully supported by lab 8.
+C3
+
+Persona: Jane
+Persona Attribute: avoid duplicate messages 
+attribute type: behavior
+operationalization: users cannot appear multiple times in the system
+derived constraint: a user cannot be registered or waitlisted more than once
+current support level: Fully supported by lab 8.
+C4
+
+Persona: Mo
+Persona Attribute: needs transparency and explanations
+attribute type: need
+operationalization: system should prompt user when they are promoted or rejected
+derived constraint: Provide clear feedback/explanation when a user is promoted or rejected
+current support level: Fully supported by lab 8.
+C5
+
+Persona: Jane
+Persona Attribute: expects predictable ordering 
+attribute type: pain point
+operationalization: The system should always order the waitlist in FIFO order.
+derived constraint: Preserve waitlist FIFO ordering.
+current support level: Fully supported by lab 8.
+C6
+
+Persona: Mo
+Persona Attribute: handles edge cases explicitly 
+attribute type: behavior
+operationalization: The system should explicitly handle zero capacity, sequential cancellations and re-registrations
+derived constraint: The system must handle zero capacity gracefully (all users go to waitlist or rejected).
+current support level: Partially supported
+C7
+
+Persona: Jane
+Persona Attribute: Limited attention/minimal interaction
+attribute type:  behavior
+operationalization: limit the notifications to just essential status changes
+derived constraint:  Provide clear feedback/explanation when a user is promoted or rejected
+current support level: Fully supported by lab 8.
+C8
+
+Persona: Mo
+Persona Attribute: Accessibility/clarity
+attribute type: behavior
+operationalization: include a snapshot function or detailed log that shows current registrations or waiting lists. 
+derived constraint: Provide clear feedback/explanation when a user is promoted or rejected, for Mo.
+current support level: Fully supported by lab 8.
+AC1:
+
+Given a user registers when event is under capacity
+
+When register(user_id) is called
+
+Then user is added to registered list, state="registered"
+
+Linked Constraint ID(s): C1, C5
+
+
+
+AC2:
+
+Given a registered user cancels
+
+When cancel(user_id) is called
+
+Then earliest waitlisted user is promoted to registered
+
+Linked Constraint ID(s): C1
+
+
+
+AC3:
+
+Given a user attempts duplicate registration
+
+When register(user_id) is called
+
+Then DuplicateRequest is raised
+
+Linked Constraint ID(s): C3
+
+
+
+AC4:
+
+Given a user queries their status
+
+When status(user_id) is called
+
+Then correct UserStatus is returned with state and waitlist position
+
+Linked Constraint ID(s): C4
+
+
+
+AC5:
+
+Given multiple users are on the waitlist
+
+When a registered user cancels
+
+Then users are promoted in strict FIFO order
+
+Linked Constraint ID(s): C2, C5
+
+
+
+AC6:
+
+Given capacity=0
+
+When a user registers
+
+Then all users are waitlisted, no user registered
+
+Linked Constraint ID(s): C6
+
+Can you identify any possible issues such as: missing constraints, ambigious requirements, unhandled edge cases
+}
+
+Answer #7 : {
+Absolutely! Let’s carefully analyze your **constraints, acceptance criteria, and personas** to spot any potential issues or gaps. I’ll break this down systematically.
+
+---
+
+### **1. Missing Constraints**
+
+* **Notifications / Feedback Limitation:**
+
+  * C7 mentions “limit notifications to essential status changes,” but there’s no explicit constraint preventing excessive or duplicate notifications beyond promotions/cancellations.
+  * **Possible issue:** If multiple actions occur quickly, the system may overwhelm Jane with messages. Could be made explicit: “The system must only notify users of changes that affect their status, avoiding duplicate or unnecessary notifications.”
+
+* **Snapshot / Transparency:**
+
+  * C8 mentions providing a snapshot/log for Mo, but it’s ambiguous whether it updates automatically or is user-triggered.
+  * **Possible issue:** If a user queries during a state transition (rapid consecutive operations), snapshot consistency is not fully guaranteed. Could add: “Snapshots must reflect the exact current system state at the time of request.”
+
+* **Edge case handling for invalid inputs:**
+
+  * Constraints assume valid `user_id` and `capacity`. But what about empty strings, `None`, or negative capacity in practice?
+  * **Missing constraint:** The system should validate inputs and raise exceptions for invalid types or values.
+
+* **Re-registration after cancellation:**
+
+  * While C6 mentions “sequential cancellations and re-registrations,” there’s no explicit constraint or AC for users who cancel and then try to register again.
+  * **Possible issue:** Does the system correctly place them in registration or waitlist? Could make it explicit.
+
+---
+
+### **2. Ambiguous Requirements**
+
+* **AC1 – “user is added to registered list”**
+
+  * It doesn’t mention what happens if multiple users register simultaneously in a system with capacity limits. For Mo, deterministic ordering is important. Should clarify: “Users are added in order of registration calls; deterministic behavior is required when operations are concurrent or sequentially rapid.”
+
+* **C4 / AC4 – User feedback / status**
+
+  * “Provide clear feedback/explanation” is vague. Does it include:
+
+    * Text notifications
+    * Logs
+    * Return values in API calls?
+  * For Mo, clarity is critical; this should specify **how the feedback is delivered**.
+
+* **C6 / AC6 – Zero capacity handling**
+
+  * AC6 mentions “all users are waitlisted, no user registered,” but doesn’t cover repeated cancellations or registrations in this scenario. Could be clarified to include **system behavior consistency over multiple operations**.
+
+---
+
+### **3. Unhandled Edge Cases**
+
+* **Rapid consecutive operations:**
+
+  * The lab spec mentions “simultaneous or rapid consecutive operations.” ACs don’t explicitly test for rapid sequences of registrations and cancellations that might expose race conditions or ordering ambiguities.
+
+* **Waitlisted user cancels before promotion:**
+
+  * Lab spec specifically mentions this scenario. There’s no AC explicitly testing if a waitlisted user cancels, and the promotion order still remains correct.
+
+* **Capacity = 0 edge cases:**
+
+  * AC6 covers first registration, but what about querying status, cancellations, or repeated registrations when capacity = 0?
+
+* **Invalid user actions:**
+
+  * What happens if `cancel(user_id)` is called for a non-existent user? ACs don’t seem to cover this explicitly.
+
+* **Re-registration of previously cancelled user:**
+
+  * Needs a clear AC: If a user cancels, can they re-register? Are they treated as new, or is there a restriction?
+
+* **System state consistency during transitions:**
+
+  * If multiple ACs occur back-to-back, does the system ensure that snapshots, registrations, and waitlist order remain consistent?
+
+---
+
+### **Summary of Potential Issues**
+
+| Category            | Issue                                       | Suggestion                                                          |
+| ------------------- | ------------------------------------------- | ------------------------------------------------------------------- |
+| Missing Constraint  | Notifications may overwhelm user            | Add explicit limit to essential feedback                            |
+| Missing Constraint  | Snapshot / logs consistency                 | Ensure snapshot always reflects current system state                |
+| Missing Constraint  | Input validation                            | Raise exception for invalid `user_id` or `capacity`                 |
+| Missing Constraint  | Re-registration after cancellation          | Explicitly define system behavior                                   |
+| Ambiguity           | AC1 deterministic ordering                  | Specify behavior under rapid/sequential registrations               |
+| Ambiguity           | AC4 feedback mechanism                      | Specify how feedback is delivered (return value, log, notification) |
+| Unhandled Edge Case | Rapid consecutive operations                | Add test / AC for rapid sequences of register/cancel                |
+| Unhandled Edge Case | Waitlisted user cancels before promotion    | Add explicit AC for this scenario                                   |
+| Unhandled Edge Case | Invalid cancellation                        | Add AC for cancelling a non-existent user                           |
+| Unhandled Edge Case | Capacity = 0 for queries or re-registration | Add AC for operations when capacity = 0                             |
+
+---
+
+💡 **Key insight:** Most of your current constraints and ACs handle “normal flow” well, but the **edge cases, invalid inputs, and system transparency/determinism under rapid operations** are under-specified. For Mo, these gaps are particularly critical.
+
+---
+
+If you want, I can **draft an updated set of ACs and edge cases** that cover these gaps while keeping your existing ACs intact. This would give you a “ready-to-submit” requirements.txt update.
+
+Do you want me to do that?
+
+}
+
+
