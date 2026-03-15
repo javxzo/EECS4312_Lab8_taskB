@@ -173,3 +173,25 @@ Revision Note 5
 Requirement updated: EC4, EC5, EC6 – additional edge cases  
 Reason: Addressed waitlisted user cancelling, invalid inputs, and re-registration scenarios.  
 Action: Added EC4, EC5, EC6; triggered by LLM feedback.
+
+## Revision Notes
+
+Revision Note 1
+Requirement updated: C4 – Feedback for promotion and rejection
+Reason: Test `test_cancel_registered_promotes_earliest_waitlisted_fifo` revealed the system must explicitly return or provide feedback when a user is promoted during cancellation to meet Mo’s transparency requirement.
+Action: Updated C4 to specify that `cancel()` must return the promoted user's new UserStatus.
+
+Revision Note 2
+Requirement updated: C8 – Re-registration after cancellation
+Reason: Tests `test_reregister_after_cancel_goes_to_registered_if_space` and `test_reregister_after_waitlist_cancel_goes_to_registered` revealed the need to clarify that users re-registering after cancelation should have no residual state and be correctly placed in registration or waitlist according to current capacity.
+Action: Clarified C8 to explicitly handle re-registration with deterministic placement.
+
+Revision Note 3
+Requirement updated: C2 – Deterministic waitlist ordering
+Reason: Test `test_deterministic_waitlist_order_under_repeated_operations` showed the importance of enforcing deterministic ordering across identical operation sequences.
+Action: Strengthened C2 to explicitly state that repeated identical operations must always produce identical system state for both registrations and waitlist positions.
+
+Revision Note 4
+Requirement updated: FR13 – Re-registration handling
+Reason: Test coverage identified ambiguity in re-registration after a user cancels from the waitlist.
+Action: Added explicit requirement: "Users re-registering after cancellation are treated as new registrations and placed according to current capacity, preserving FIFO ordering for the waitlist."
